@@ -58,10 +58,22 @@ const getCurrentSafacy = async (req, res, next) => {
 };
 
 const stopPublicMode = async (req, res, next) => {
+  const { id } = req.params;
+
   try {
-    console.log("something");
+    await User.updateOne({ id }, { $set: { publicMode: false } });
+    const { publicMode } = await User.findById(id).lean().exec();
+
+    res.json({
+      publicMode,
+    });
   } catch (err) {
-    console.log(err);
+    res.json({
+      error: {
+        message: "Invalid Server Error",
+        code: 500,
+      },
+    });
   }
 };
 
