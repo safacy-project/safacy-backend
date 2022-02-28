@@ -10,6 +10,7 @@ const createError = require("http-errors");
 const { connectDB } = require("./database/database");
 
 const authRouter = require("./routes/auth");
+const safacyRouter = require("./routes/safacy");
 const profileRouter = require("./routes/profile");
 
 connectDB();
@@ -26,6 +27,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/auth", authRouter);
+app.use("/safacy", safacyRouter);
 app.use("/profile", profileRouter);
 
 app.use((req, res, next) => {

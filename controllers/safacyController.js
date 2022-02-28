@@ -1,10 +1,23 @@
 const Safacy = require("../models/Safacy");
+const User = require("../models/User");
 
 const getUserInfo = async (req, res, next) => {
+  const { id } = req.params;
   try {
-    console.log("something");
+    const userSafacy = await User.findById(id)
+      .populate("myFriendList")
+      .populate("safacyHistory")
+      .lean()
+      .exec();
+
+    res.json(userSafacy);
   } catch (err) {
-    console.log(err);
+    res.json({
+      error: {
+        message: "Invalid Server Error",
+        code: 500,
+      },
+    });
   }
 };
 
