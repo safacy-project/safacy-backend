@@ -42,10 +42,44 @@ const startPublicMode = async (req, res, next) => {
 };
 
 const createSafacy = async (req, res, next) => {
+  const { id } = req.params;
+  const { destination, radius, time, invitedFriendList } = req.body;
+
   try {
-    console.log("something");
+    const currentUser = await User.findById(id).exec();
+    const currentUserId = currentUser._id;
+
+    const newSafacy = await Safacy.create({
+      user: currentUser.email,
+      destination,
+      radius,
+      time,
+      invitedFriendList,
+    });
+
+    const newSafacyId = newSafacy._id;
+    await currentUser.safacyHistory.push(newSafacyId);
+
+    const updateFriendInvitation = async (friendEmail, userId) => {
+      const friend = await User.findOne({ email: friendEmail }).exec();
+      friend.safacyInvitationList.push(userId);
+      await friend.save();
+    };
+
+    for (let i = 0; i < invitedFriendList.length; i++) {
+      updateFriendInvitation(invitedFriendList[i], currentUserId);
+    }
+
+    await currentUser.save();
+
+    res.json(newSafacy);
   } catch (err) {
-    console.log(err);
+    res.json({
+      error: {
+        message: "Invalid Server Error",
+        code: 500,
+      },
+    });
   }
 };
 
