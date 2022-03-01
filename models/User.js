@@ -30,21 +30,12 @@ const UserSchema = new mongoose.Schema({
       ref: "Safacy",
     },
   ],
-  safacyInvitationList: {
-    type: [
-      {
-        email: {
-          type: String,
-          required: true,
-          validate: [isEmail, "please enter a valid Email"],
-        },
-        nickname: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-  },
+  safacyInvitationList: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 module.exports = mongoose.model("User", UserSchema);
