@@ -4,10 +4,6 @@ const safacyController = require("../controllers/safacyController");
 
 const router = express.Router();
 
-router.get("/:id", safacyController.getUserInfo);
-router.put("/:id/public", safacyController.startPublicMode);
-router.post("/:id/new", safacyController.createSafacy);
-router.get("/current/:id", safacyController.getCurrentSafacy);
-router.put("/:id/privacy", safacyController.stopPublicMode);
+router.post("/:id", safacyController.getPublicModeFrinedList);
 
 module.exports = router;
