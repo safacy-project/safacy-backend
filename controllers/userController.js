@@ -7,6 +7,7 @@ const getUserInfo = async (req, res) => {
     const userSafacy = await User.findById(id)
       .populate("myFriendList")
       .populate("safacyHistory")
+      .populate("safacyInvitationList")
       .lean()
       .exec();
 
@@ -40,7 +41,6 @@ const startPublicMode = async (req, res) => {
     });
   }
 };
-
 const createSafacy = async (req, res) => {
   const { id } = req.params;
   const { destination, radius, time, invitedFriendList } = req.body;
@@ -93,11 +93,21 @@ const createSafacy = async (req, res) => {
   }
 };
 
-const getCurrentSafacy = async (req, res, next) => {
+const getCurrentSafacy = async (req, res) => {
+  const { id } = req.params;
   try {
-    console.log("something");
+    const { safacyHistory } = await User.findById(id).lean().exec();
+    const currentSafacyId = safacyHistory.pop();
+    const currentSafacy = await Safacy.findById(currentSafacyId).lean().exec();
+
+    res.json(currentSafacy);
   } catch (err) {
-    console.log(err);
+    res.json({
+      error: {
+        message: "Invalid Server Error",
+        code: 500,
+      },
+    });
   }
 };
 
