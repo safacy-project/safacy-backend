@@ -1,6 +1,8 @@
 const Safacy = require("../models/Safacy");
 const User = require("../models/User");
 
+const { RESPONSE_MESSAGE } = require("../constants");
+
 const getUserInfo = async (req, res) => {
   const { id } = req.params;
   try {
@@ -12,10 +14,12 @@ const getUserInfo = async (req, res) => {
       .exec();
 
     res.json(userSafacy);
+
+    return;
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });
@@ -32,15 +36,18 @@ const startPublicMode = async (req, res) => {
     res.json({
       publicMode,
     });
+
+    return;
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });
   }
 };
+
 const createSafacy = async (req, res) => {
   const { id } = req.params;
   const { destination, radius, time, invitedFriendList } = req.body;
@@ -51,8 +58,12 @@ const createSafacy = async (req, res) => {
 
     if (currentUser.privateMode) {
       res.json({
-        error: "already in Public Mode",
+        error: {
+          message: RESPONSE_MESSAGE.ALREADY_PUBLIC_MODE,
+          code: 404,
+        },
       });
+
       return;
     }
 
@@ -83,10 +94,12 @@ const createSafacy = async (req, res) => {
     ]);
 
     res.json(newSafacy);
+
+    return;
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });
@@ -101,21 +114,14 @@ const getCurrentSafacy = async (req, res) => {
     const currentSafacy = await Safacy.findById(currentSafacyId).lean().exec();
 
     res.json(currentSafacy);
+    return;
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });
-  }
-};
-
-const getPublicModeFrinedList = async (req, res, next) => {
-  try {
-    console.log("something");
-  } catch (err) {
-    console.log(err);
   }
 };
 
@@ -147,19 +153,82 @@ const stopPublicMode = async (req, res) => {
     res.json({
       publicMode,
     });
+
+    return;
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });
   }
 };
 
+const addNewFriend = async (req, res) => {
+  const { id } = req.params;
+  const { email } = req.body;
+  try {
+    const { email: userEmail } = await User.findById(id).lean().exec();
+    const friend = await User.findOne({ email }).exec();
+
+    if (!friend) {
+      res.json({
+        message: RESPONSE_MESSAGE.NOT_VALID_USER,
+        code: 404,
+      });
+      return;
+    }
+
+    if (friend.friendInvitationList.includes(userEmail)) {
+      res.json({
+        message: RESPONSE_MESSAGE.INVITED_USER,
+        code: 404,
+      });
+      return;
+    }
+
+    for (let i = 0; i < friend.myFriendList.length; i++) {
+      if (friend.myFriendList[i].toString === id) {
+        res.json({
+          message: RESPONSE_MESSAGE.ALREADY_FRIEND,
+          code: 404,
+        });
+        return;
+      }
+    }
+
+    friend.friendInvitationList.push(userEmail);
+    await friend.save();
+
+    res.json({
+      result: "ok",
+    });
+  } catch (err) {
+    res.json({
+      error: {
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
+        code: 500,
+      },
+    });
+  }
+};
+
+const acceptFriendInvitation = async (req, res, next) => {
+  try {
+    console.log("something");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.getUserInfo = getUserInfo;
-exports.startPublicMode = startPublicMode;
 exports.createSafacy = createSafacy;
-exports.getCurrentSafacy = getCurrentSafacy;
+
+exports.startPublicMode = startPublicMode;
 exports.stopPublicMode = stopPublicMode;
-exports.getPublicModeFrinedList = getPublicModeFrinedList;
+
+exports.getCurrentSafacy = getCurrentSafacy;
+
+exports.addNewFriend = addNewFriend;
+exports.acceptFriendInvitation = acceptFriendInvitation;
