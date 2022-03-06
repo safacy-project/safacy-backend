@@ -212,6 +212,7 @@ const addNewFriend = async (req, res) => {
     res.json({
       result: "ok",
     });
+    return;
   } catch (err) {
     res.json({
       error: {
@@ -223,10 +224,32 @@ const addNewFriend = async (req, res) => {
 };
 
 const acceptFriendInvitation = async (req, res, next) => {
+  const { id } = req.params;
+  const { email } = req.body;
+
   try {
-    console.log("something");
+    const currentUser = await User.findById(id).exec();
+    const inviteUser = await User.findOne({ email }).exec();
+
+    const newFriendList = currentUser.friendInvitationList.filter(
+      (friendEmail) => friendEmail !== email
+    );
+    currentUser.friendInvitationList = newFriendList;
+    currentUser.myFriendList.push(inviteUser._id);
+    inviteUser.myFriendList.push(currentUser._id);
+
+    Promise.all([currentUser.save(), inviteUser.save()]);
+    res.json({
+      result: "ok",
+    });
+    return;
   } catch (err) {
-    console.log(err);
+    res.json({
+      error: {
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
+        code: 500,
+      },
+    });
   }
 };
 
