@@ -89,7 +89,10 @@ const createSafacy = async (req, res) => {
     }
 
     Promise.all([
-      User.updateOne({ id }, { $set: { publicMode: true } }),
+      await User.updateOne(
+        { _id: currentUserId },
+        { $set: { publicMode: true } }
+      ),
       currentUser.save(),
     ]);
 
@@ -130,7 +133,12 @@ const stopPublicMode = async (req, res) => {
   const { safacyId } = req.body;
 
   try {
-    await User.updateOne({ id }, { $set: { publicMode: false } });
+    const currentUser = await User.findById(id).exec();
+    const currentUserId = currentUser._id;
+    await User.updateOne(
+      { _id: currentUserId },
+      { $set: { publicMode: false } }
+    );
     const { publicMode } = await User.findById(id).lean().exec();
     const { invitedFriendList } = await Safacy.findById(safacyId).lean().exec();
 
@@ -140,7 +148,7 @@ const stopPublicMode = async (req, res) => {
       }).exec();
 
       const newSafacyInvitationList = invitedFriend.safacyInvitationList.filter(
-        (invitation) => invitation.toString() !== id.toString()
+        (invitation) => invitation.toString() !== currentUserId.toString()
       );
       invitedFriend.safacyInvitationList = newSafacyInvitationList;
       await invitedFriend.save();
