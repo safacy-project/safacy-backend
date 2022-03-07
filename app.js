@@ -7,7 +7,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const createError = require("http-errors");
 
-const { connectDB } = require("./database/database");
+const { connectDB } = require("./connection/database");
 
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/user");
