@@ -23,6 +23,10 @@ const SafacySchema = new mongoose.Schema({
     type: Array,
     validate: [(val) => val.length < 4, "must have maximum 3 friends"],
   },
+  safacyBotMsg: {
+    type: Array,
+    default: [],
+  },
 });
 
 module.exports = mongoose.model("Safacy", SafacySchema);

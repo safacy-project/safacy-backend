@@ -4,6 +4,7 @@ const safacyController = require("../controllers/safacyController");
 
 const router = express.Router();
 
-router.post("/:id", safacyController.getPublicModeFrinedList);
+router.get("/:id", safacyController.getSafacyMsg);
+router.put("/:id/update", safacyController.updateSafacyMsg);
 
 module.exports = router;
