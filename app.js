@@ -7,11 +7,11 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const createError = require("http-errors");
 
-const { connectDB } = require("./database/database");
+const { connectDB } = require("./connection/database");
 
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/user");
-const profileRouter = require("./routes/profile");
+const safacyRouter = require("./routes/safacy");
 
 connectDB();
 const app = express();
@@ -28,7 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
-app.use("/profile", profileRouter);
+app.use("/safacy", safacyRouter);
 
 app.use((req, res, next) => {
   next(createError(404));

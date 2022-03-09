@@ -16,7 +16,7 @@ const getUserInfo = async (req, res) => {
     res.json(userSafacy);
 
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -38,7 +38,7 @@ const startPublicMode = async (req, res) => {
     });
 
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -50,7 +50,8 @@ const startPublicMode = async (req, res) => {
 
 const createSafacy = async (req, res) => {
   const { id } = req.params;
-  const { destination, radius, time, invitedFriendList } = req.body;
+  const { destination, radius, time, invitedFriendList, userDestination } =
+    req.body;
 
   try {
     const currentUser = await User.findById(id).exec();
@@ -73,6 +74,7 @@ const createSafacy = async (req, res) => {
       radius,
       time,
       invitedFriendList,
+      userDestination,
     });
 
     const newSafacyId = newSafacy._id;
@@ -99,7 +101,7 @@ const createSafacy = async (req, res) => {
     res.json(newSafacy);
 
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -117,8 +119,9 @@ const getCurrentSafacy = async (req, res) => {
     const currentSafacy = await Safacy.findById(currentSafacyId).lean().exec();
 
     res.json(currentSafacy);
+
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -141,6 +144,7 @@ const stopPublicMode = async (req, res) => {
     );
     const { publicMode } = await User.findById(id).lean().exec();
     const { invitedFriendList } = await Safacy.findById(safacyId).lean().exec();
+    await Safacy.updateOne({ _id: safacyId }, { $set: { publicMode: false } });
 
     const deleteEmail = async (friendEmail) => {
       const invitedFriend = await User.findOne({
@@ -163,7 +167,7 @@ const stopPublicMode = async (req, res) => {
     });
 
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -177,33 +181,33 @@ const addNewFriend = async (req, res) => {
   const { id } = req.params;
   const { email } = req.body;
   try {
-    const { email: userEmail } = await User.findById(id).lean().exec();
+    const { email: userEmail, _id } = await User.findById(id).lean().exec();
     const friend = await User.findOne({ email }).exec();
 
     if (!friend) {
       res.json({
-        message: RESPONSE_MESSAGE.NOT_VALID_USER,
-        code: 404,
-      });
-      return;
-    }
-
-    if (friend.friendInvitationList.includes(userEmail)) {
-      res.json({
-        message: RESPONSE_MESSAGE.INVITED_USER,
+        result: RESPONSE_MESSAGE.NOT_VALID_USER,
         code: 404,
       });
       return;
     }
 
     for (let i = 0; i < friend.myFriendList.length; i++) {
-      if (friend.myFriendList[i].toString === id) {
+      if (friend.myFriendList[i].toString() === id) {
         res.json({
-          message: RESPONSE_MESSAGE.ALREADY_FRIEND,
+          result: RESPONSE_MESSAGE.ALREADY_FRIEND,
           code: 404,
         });
         return;
       }
+    }
+
+    if (friend.friendInvitationList.includes(userEmail)) {
+      res.json({
+        result: RESPONSE_MESSAGE.INVITED_USER,
+        code: 404,
+      });
+      return;
     }
 
     friend.friendInvitationList.push(userEmail);
@@ -212,8 +216,9 @@ const addNewFriend = async (req, res) => {
     res.json({
       result: "ok",
     });
+
     return;
-  } catch (err) {
+  } catch {
     res.json({
       error: {
         message: RESPONSE_MESSAGE.SERVER_ERROR,
@@ -239,9 +244,11 @@ const acceptFriendInvitation = async (req, res, next) => {
     inviteUser.myFriendList.push(currentUser._id);
 
     Promise.all([currentUser.save(), inviteUser.save()]);
+
     res.json({
       result: "ok",
     });
+
     return;
   } catch (err) {
     res.json({
