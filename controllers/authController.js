@@ -1,6 +1,9 @@
 const User = require("../models/User");
+const Safacy = require("../models/Safacy");
 
-const signIn = async (req, res, next) => {
+const { RESPONSE_MESSAGE } = require("../constants");
+
+const signIn = async (req, res) => {
   const { email, nickname } = req.body;
 
   try {
@@ -10,6 +13,19 @@ const signIn = async (req, res, next) => {
       await User.create({
         email,
         nickname,
+      });
+
+      await Safacy.create({
+        user: email,
+        publicMode: false,
+        destination: "",
+        radius: 50,
+        time: 30,
+        invitedFriendList: [],
+        safacyBotMsg: [],
+        originLocation: [],
+        userDestination: [],
+        desLocation: [],
       });
     }
 
@@ -21,7 +37,7 @@ const signIn = async (req, res, next) => {
   } catch (err) {
     res.json({
       error: {
-        message: "Invalid Server Error",
+        message: RESPONSE_MESSAGE.SERVER_ERROR,
         code: 500,
       },
     });

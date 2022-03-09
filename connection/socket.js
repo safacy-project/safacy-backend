@@ -7,6 +7,7 @@ const server = (server) => {
 
   io.on("connect", (socket) => {
     console.log("socket is connected");
+
     socket.on("join", (roomName) => {
       socket.join(roomName);
     });
@@ -16,11 +17,11 @@ const server = (server) => {
     });
 
     socket.on("position", (position) => {
-      socket.emit("myposition", position.data);
+      io.emit("myposition", position.data);
     });
 
     socket.on("safacyBot", (message) => {
-      socket.emit("safacyMsg", message.data);
+      io.emit("safacyMsg", message);
     });
   });
 
