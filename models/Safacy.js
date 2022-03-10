@@ -25,7 +25,7 @@ const SafacySchema = new mongoose.Schema({
   },
   invitedFriendList: {
     type: Array,
-    validate: [(val) => val.length < 4, "must have maximum 3 friends"],
+    validate: [(val) => val.length < 11, "must have maximum 10 friends"],
   },
   safacyBotMsg: {
     type: Array,

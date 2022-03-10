@@ -10,23 +10,31 @@ const signIn = async (req, res) => {
     const user = await User.findOne({ email }).exec();
 
     if (!user) {
-      await User.create({
+      const newUser = await User({
         email,
         nickname,
       });
 
-      await Safacy.create({
+      const userSafacy = await Safacy({
         user: email,
         publicMode: false,
-        destination: "",
+        destination: "현재위치",
         radius: 50,
         time: 30,
         invitedFriendList: [],
         safacyBotMsg: [],
-        originLocation: [],
+        originLocation: [
+          {
+            latitude: 37.518227,
+            longitude: 127.0434187,
+          },
+        ],
         userDestination: [],
         desLocation: [],
       });
+
+      newUser.safacyHistory.push(userSafacy._id);
+      Promise.all([newUser.save(), userSafacy.save()]);
     }
 
     res.json({

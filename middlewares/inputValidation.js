@@ -17,7 +17,7 @@ const createSafacyInputValidators = [
   body("invitedFriendList")
     .exists()
     .withMessage(VALIDATOR_MESSAGE.MUST_HAVE)
-    .isArray({ min: 1, max: 3 })
+    .isArray({ min: 1 })
     .withMessage(VALIDATOR_MESSAGE.COUNT_LIMIT),
 ];
 

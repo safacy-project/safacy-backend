@@ -1,4 +1,5 @@
 const socket = require("socket.io");
+const { SOCKET_MESSAGE } = require("../constants");
 
 const server = (server) => {
   const io = socket(server, {
@@ -6,7 +7,7 @@ const server = (server) => {
   });
 
   io.on("connect", (socket) => {
-    console.log("socket is connected");
+    console.log(SOCKET_MESSAGE.CONNECTED);
 
     socket.on("join", (roomName) => {
       socket.join(roomName);
@@ -26,7 +27,7 @@ const server = (server) => {
   });
 
   io.on("disconnect", (reason) => {
-    console.log(reason);
+    console.log(SOCKET_MESSAGE.DISCONNECTED);
   });
 };
 
