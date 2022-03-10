@@ -12,5 +12,11 @@ const VALIDATOR_MESSAGE = Object.freeze({
   COUNT_LIMIT: "갯수 제한이 있습니다",
 });
 
+const SOCKET_MESSAGE = Object.freeze({
+  CONNECTED: "socket is connected",
+  DISCONNECTED: "socket is disconnected",
+});
+
 exports.RESPONSE_MESSAGE = RESPONSE_MESSAGE;
 exports.VALIDATOR_MESSAGE = VALIDATOR_MESSAGE;
+exports.SOCKET_MESSAGE = SOCKET_MESSAGE;
